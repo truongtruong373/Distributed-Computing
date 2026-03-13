@@ -1,0 +1,34 @@
+name: Split Learning Basic
+server:
+  global-round: 1
+  clients:
+    - 1
+    - 1
+  cut-layers: [7]
+  model: VGG16
+  data-name: CIFAR10
+  parameters:
+    load: True
+    save: True
+  validation: True
+  data-distribution:
+    non-iid: False
+    num-sample: 5000
+    num-label: 10
+
+rabbit:
+  address: 127.0.0.1
+  username: admin
+  password: admin
+  virtual-host: /
+
+log_path: .
+debug_mode: True
+
+learning:
+  learning-rate: 0.01
+  momentum: 0.5
+  batch-size: 32
+  control-count: 3
+  clip-grad-norm: 0.0
+
