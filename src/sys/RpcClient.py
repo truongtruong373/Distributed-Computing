@@ -41,7 +41,7 @@ class RpcClient:
             cut_layers = self.response['layers']
             label_count = self.response['label_count']
             num_layers = self.response['num_layers']
-            clip_grad_norm = self.response['clip_grad_norm']
+            learning = self.response['learning']
             data_name = self.response["data_name"]
 
             self.model_train = Train_VGG16(self.client_id, self.layer_id, self.channel, self.device)
@@ -59,11 +59,6 @@ class RpcClient:
                 else:
                     self.model = klass(end_layer=cut_layers[1])
 
-            batch_size = self.response["batch_size"]
-            lr = self.response["lr"]
-            momentum = self.response["momentum"]
-            control_count = self.response["control_count"]
-
             # Read parameters and load to model
             if state_dict:
                 self.model.load_state_dict(state_dict)
@@ -73,13 +68,12 @@ class RpcClient:
             # Start training
             if self.layer_id == 1:
                 if self.train_loader is None:
-                    self.train_loader = data_loader(data_name, batch_size, self.label_count, train=True)
+                    self.train_loader = data_loader(data_name, learning['batch-size'], self.label_count, train=True)
 
-                result, size = self.model_train.train_on_first_layer(self.model, lr, momentum, clip_grad_norm,
-                                                                         control_count, self.train_loader)
+                result, size = self.model_train.train_on_first_layer(self.model, learning, self.train_loader)
 
             else:
-                result, size = self.model_train.train_on_last_layer(self.model, lr, momentum, clip_grad_norm)
+                result, size = self.model_train.train_on_last_layer(self.model, learning)
 
             # Stop training, then send parameters to server
             model_state_dict = copy.deepcopy(self.model.state_dict())

@@ -58,8 +58,8 @@ class Train_VGG16:
                                    routing_key='rpc_queue',
                                    body=pickle.dumps(message))
 
-    def train_on_first_layer(self, model, lr, momentum, clip_grad_norm, control_count=3, train_loader=None):
-        optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+    def train_on_first_layer(self, model, learning, train_loader=None):
+        optimizer = optim.SGD(model.parameters(), lr=learning['learning-rate'], momentum=learning['momentum'])
 
         backward_queue_name = f'gradient_queue_{self.layer_id}_{self.client_id}'
         self.channel.queue_declare(queue=backward_queue_name, durable=False)
@@ -92,7 +92,7 @@ class Train_VGG16:
                     optimizer.step()
                 else:
                     # speed control
-                    if len(data_store) >= control_count:
+                    if len(data_store) >= learning['control-count']:
                         continue
                     # Process forward message
                     try:
@@ -135,8 +135,8 @@ class Train_VGG16:
                     return True , self.data_count
             time.sleep(0.5)
 
-    def train_on_last_layer(self, model, lr, momentum, clip_grad_norm):
-        optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+    def train_on_last_layer(self, model, learning):
+        optimizer = optim.SGD(model.parameters(), lr=learning['learning-rate'], momentum=learning['momentum'])
         result = True
 
         criterion = nn.CrossEntropyLoss()
@@ -172,8 +172,6 @@ class Train_VGG16:
 
                 intermediate_output.retain_grad()
                 loss.backward()
-                if clip_grad_norm and clip_grad_norm > 0:
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad_norm)
 
                 optimizer.step()
                 self.data_count += 1

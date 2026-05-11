@@ -20,7 +20,6 @@ class Server:
         password = config["rabbit"]["password"]
         virtual_host = config["rabbit"]["virtual-host"]
 
-        self.manual_cluster = config["server"]["manual-cluster"]
         self.model_name = config["server"]["model"]
         self.data_name = config["server"]["data-name"]
         self.total_clients = config["server"]["clients"]
@@ -29,13 +28,10 @@ class Server:
         self.save_parameters = config["server"]["parameters"]["save"]
         self.load_parameters = config["server"]["parameters"]["load"]
         self.validation = config["server"]["validation"]
+        self.cut_layers = config["server"]["cut-layers"]
 
         # Clients
-        self.batch_size = config["learning"]["batch-size"]
-        self.lr = config["learning"]["learning-rate"]
-        self.momentum = config["learning"]["momentum"]
-        self.control_count = config["learning"]["control-count"]
-        self.clip_grad_norm = config["learning"]["clip-grad-norm"]
+        self.learning = config["learning"]
         self.data_distribution = config["server"]["data-distribution"]
 
         # Data distribution
@@ -64,7 +60,6 @@ class Server:
         self.global_params = None
         self.global_sizes = None
         self.avg_state_dict = []
-        self.cut_layers = []
 
         self.channel.basic_qos(prefetch_count=1)
         self.reply_channel = self.connection.channel()
@@ -134,7 +129,7 @@ class Server:
                 self.first_layer_clients = 0
                 src.utils.Log.print_with_color(f"Received finish training notification", "yellow")
 
-                for (client_id, layer_id) in self.list_clients:
+                for (client_id, layer_id, _) in self.list_clients:
                     self.send_to_response(client_id, pickle.dumps(message))
 
         elif action == "UPDATE":
@@ -230,11 +225,7 @@ class Server:
                             "layers": layers,
                             "model_name": self.model_name,
                             "data_name": self.data_name,
-                            "control_count": self.control_count,
-                            "batch_size": self.batch_size,
-                            "lr": self.lr,
-                            "momentum": self.momentum,
-                            "clip_grad_norm": self.clip_grad_norm,
+                            "learning": self.learning,
                             "label_count": label}
                 self.send_to_response(client_id, pickle.dumps(response))
 
@@ -278,4 +269,4 @@ class Server:
         for idx, layer_dict in enumerate(avg_layers):
             sd = layer_dict
             full_dict.update(copy.deepcopy(sd))
-        return avg_layers
+        return full_dict

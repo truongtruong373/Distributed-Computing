@@ -30,5 +30,3 @@ learning:
   momentum: 0.5
   batch-size: 32
   control-count: 3
-  clip-grad-norm: 0.0
-

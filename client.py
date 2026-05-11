@@ -38,11 +38,6 @@ credentials = pika.PlainCredentials(username, password)
 connection = pika.BlockingConnection(pika.ConnectionParameters(address, 5672, f'{virtual_host}', credentials))
 channel = connection.channel()
 
-if args.cluster is None:
-    cluster = -1
-else:
-    cluster = args.cluster
-
 if __name__ == "__main__":
     src.utils.Log.print_with_color("[>>>] Client sending registration message to server...", "red")
 
