@@ -1,0 +1,21 @@
+name: Centralized Learning
+server:
+  global-round: 1
+  model: VGG16
+  data-name: CIFAR10
+  parameters:
+    load: True
+    save: True
+  validation: True
+  data-distribution:
+    non-iid: False
+    num-sample: 5000
+    num-label: 10
+
+log_path: .
+debug_mode: True
+
+learning:
+  learning-rate: 0.01
+  momentum: 0.5
+  batch-size: 32
