@@ -2,7 +2,7 @@ import torch
 import random
 import numpy as np
 import src.utils.Log as Log
-from train.VGG16 import train_on_device
+from src.train.VGG16 import train_on_device
 from src.dataset.dataloader import data_loader
 
 from src.model.VGG16_CIFAR10 import VGG16_CIFAR10
@@ -48,7 +48,7 @@ class Client:
     def start(self):
         self.distribution()
         model = VGG16_CIFAR10()
-        train_data = data_loader(self.data_name, self.learning['batch_size'], self.label_counts[0], True)
+        train_data = data_loader(self.data_name, self.learning['batch-size'], self.label_counts[0], True)
 
         for _ in range(self.round):
             model = train_on_device(model, self.learning, train_data, 'cpu')
